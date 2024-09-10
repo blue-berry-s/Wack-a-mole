@@ -1,0 +1,55 @@
+body{
+    text-align: center;
+}
+
+#Spawn_area{
+    margin:auto;
+    width: 30em;
+    height: 30em;
+    display:flex;
+    flex-direction: column;
+    background-color:red;
+}
+
+.spawn_row{
+    width: 100%;
+    flex:1;
+    border-color:black;
+    border-width:1px;
+    border-style:solid;
+    background-color:blue;
+    display:flex;
+    align-items: center;
+    padding: 1em;
+}
+
+.spawn_hole{
+    background-color: yellow;
+    height:100%;
+    flex:1;
+    border-radius: 50%;
+    margin: 1em;
+    align-items: center;
+    justify-content: center;
+    display:flex;
+    
+}
+
+.mole_obj{
+    width:5em;
+    height:5em;
+    background-color:brown;
+}
+
+
+.mole_obj:active{
+    background-color: black;
+}
+
+.active{
+    display:inline-block;
+}
+
+.deactive{
+    display:none;
+}

@@ -4,9 +4,23 @@ const timerText = document.getElementById("timer");
 const playBttn = document.getElementById("start");
 const bannerBg = document.getElementById("wave_banner");
 const bannerText = document.getElementById("banner_text");
+const highScoreText = document.getElementById("high_score");
 
+let highScore = null;
 
-let gameTimer = 60;
+if (localStorage.getItem("storedHighScore") == null){
+    highScore = {
+        score: 0,
+    }
+    localStorage.setItem("storedHighScore", JSON.stringify(highScore));
+}
+else{
+    highScore = JSON.parse(localStorage.getItem("storedHighScore"));
+    setScoreTexts();
+}
+
+const TOTALGAMETIME = 60;
+let gameTimer = TOTALGAMETIME;
 timerText.innerText = `${gameTimer} sec`
 
 
@@ -18,11 +32,11 @@ let playing;
 let currentScore = 0;
 
 let waveCounting = false;
-const WAVEWAIT = 20;
+//Always have 4 rounds
+const WAVEWAIT = Math.ceil(gameTimer/4);
 let waveTime = WAVEWAIT;
 let waveTimer;
-
-
+let activeMoles = [];
 
 /**
  * Blinking display mechanism
@@ -33,12 +47,13 @@ function spawnMoles(){
         for (let i = 0; i < difficulty; i++){
             let check = Math.round(Math.random() * (allMoles.length - 1));
             while (chosen.includes(check)){
-                check = Math.round(Math.random() * allMoles.length);
+                check = Math.round(Math.random() * (allMoles.length - 1));
             }
             chosen.push(check);
         }
+        
 
-        activeMoles = new Object();
+        activeMoles = [];
 
         chosen.forEach( i => {
             allMoles[i].classList.remove("deactive");
@@ -80,7 +95,6 @@ function decWaveTimer(diffInc){
         waveCounting = false;
         clearInterval(waveTimer);
         if (gameTimer != 0){
-            console.log("PLAY ANOTHER WAVE: DIFFICULTY: " + difficulty);
             playWave(diffInc + 1);
         }
     }
@@ -90,44 +104,51 @@ function decWaveTimer(diffInc){
 
 
 function playGame(){
+    
     playBttn.disabled = true;
      // Sets up the stage
-     allMoles.forEach(mole =>{
-        mole.addEventListener("click", event =>{
-            currentScore++;
-            pointText.innerText = `Score:${currentScore}`;
-            const index = Array.prototype.indexOf.call(allMoles, event.currentTarget);
-            event.currentTarget.classList.remove("active");
-            event.currentTarget.classList.add("dead");
-            event.currentTarget.classList.add("deactive");
-            setTimeout(function(obj) {
-                obj.classList.remove("dead");},400, allMoles[index]);
-            clearTimeout(activeMoles[index]);
-            
-        }
+    allMoles.forEach(mole =>{
+        mole.addEventListener("click", incScore
         );
         mole.classList.remove("acitve");
         mole.classList.add("deactive");
     })
-
+   
     playWave(1);
-    
-
 
 }
 
 function decGameTime(){
     gameTimer --;
-    timerText.innerText = `${gameTimer} sec`;
-    if (gameTimer == 0){
+    setTimerText()
+    if (gameTimer <= 0){
         clearInterval(playing);
-        timerText.innerText = `GAME DONE!`;
+        
+        if (activeMoles.length > 0){
+            activeMoles.forEach( timeOut => 
+                clearTimeout(timeOut)
+            );
+        }
+        allMoles.forEach(mole => {
+            mole.classList.remove("deactive");
+            mole.classList.add("active");
+            mole.removeEventListener("click", incScore);
+        })
+        if (currentScore > highScore.score){
+            highScore.score = currentScore;
+            localStorage.setItem("storedHighScore", JSON.stringify(highScore));
+            timerText.innerText = "NEW HIGHSCORE \n GAME DONE!";
+            setScoreTexts();
+        }
+        else{
+            timerText.innerText = `GAME DONE!`;
+        }
+
+        playBttn.disabled = false;
+        playBttn.innerText = "Play again?";
+        playBttn.removeAttribute("onclick");
+        playBttn.setAttribute("onclick", "restart()");
     }
-
-    playBttn.disabled = false;
-    playBttn.setAttribute("onclick", );
-    
-
 }
 
 
@@ -137,7 +158,41 @@ function refresh(){
 }
 
 function restart(){
+    clearInterval(waveTimer);
+    playBttn.innerHTML = "Play Game";
+    playing = null;
+    waveCounting = false;
+    waveTimer = null;
+    currentScore = 0;
+    waitTime = 2000;
+    difficulty = 1;
+    gameTimer = TOTALGAMETIME;
+    setTimerText();
+    playBttn.removeAttribute("onclick");
+    playBttn.setAttribute("onclick", "playGame()");
+
+    playGame();
     
 }
 
 
+function setScoreTexts(){
+    highScoreText.innerText = `High Score: ${highScore.score}`;
+}
+
+
+function setTimerText(){
+    timerText.innerText = `${gameTimer} sec`;
+}
+
+function incScore(event){
+        currentScore++;
+        pointText.innerText = `Score:${currentScore}`;
+        const index = Array.prototype.indexOf.call(allMoles, event.currentTarget);
+        event.currentTarget.classList.remove("active");
+        event.currentTarget.classList.add("dead");
+        event.currentTarget.classList.add("deactive");
+        setTimeout(function(obj) {
+            obj.classList.remove("dead");},400, allMoles[index]);
+        clearTimeout(activeMoles[index]);
+}

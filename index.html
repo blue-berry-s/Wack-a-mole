@@ -6,8 +6,8 @@
     </head>
     <body>
         <h1 id="timer"> 00:00 </h1>
-        <h2> High Score: 0</h2>
         <p id="score"> Score: 0</p>
+
         <div id="Spawn_area">
             <div class="spawn_row"> 
                 <div class="spawn_hole"> <button class="mole_obj active"> Mole </button> </div>
@@ -26,7 +26,8 @@
             </div>
         </div>
 
-        <button onclick="playRounds()"> Play Game </button>
+        <button id="start" onclick="playGame()"> Play Game </button> 
+        <button id="Restart" onclick="refresh()"> Restart </button>
     </body>
     <script src="script.js"></script>
 </html>

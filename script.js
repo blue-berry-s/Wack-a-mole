@@ -1,12 +1,27 @@
 const allMoles = document.querySelectorAll(".mole_obj");
 const pointText = document.getElementById("score");
+const timerText = document.getElementById("timer");
+const playBttn = document.getElementById("start");
+const bannerBg = document.getElementById("wave_banner");
+const bannerText = document.getElementById("banner_text");
+
+
+let gameTimer = 60;
+timerText.innerText = `${gameTimer} sec`
+
+
 let difficulty = 1;
-let waitTime = 2000;
+let waitTime = 2000
+
 
 let playing;
-let activeMoles;
-
 let currentScore = 0;
+
+let waveCounting = false;
+const WAVEWAIT = 20;
+let waveTime = WAVEWAIT;
+let waveTimer;
+
 
 
 /**
@@ -31,7 +46,6 @@ function spawnMoles(){
 
             
             activeMoles[i] = setTimeout(function(index) {
-                console.log(index);
                 allMoles[index].classList.add("deactive");
                 allMoles[index].classList.remove("active");
             }, waitTime, i);
@@ -41,6 +55,42 @@ function spawnMoles(){
 }
 
 function playRounds(){
+    spawnMoles();
+    playing = setInterval(spawnMoles, (difficulty+1)*waitTime);
+}
+
+function playWave(diffInc){
+    if (!playing){
+        playRounds();
+    }
+    if (!waveCounting){
+        waveCounting = true;
+        waveTimer = setInterval(function () {decWaveTimer(diffInc)}, 1000);
+    }
+
+}
+
+
+function decWaveTimer(diffInc){   
+    waveTime --;
+    decGameTime()
+    if (waveTime == 0){
+        difficulty = difficulty + diffInc;
+        waveTime = WAVEWAIT;
+        waveCounting = false;
+        clearInterval(waveTimer);
+        if (gameTimer != 0){
+            console.log("PLAY ANOTHER WAVE: DIFFICULTY: " + difficulty);
+            playWave(diffInc + 1);
+        }
+    }
+    
+}
+
+
+
+function playGame(){
+    playBttn.disabled = true;
      // Sets up the stage
      allMoles.forEach(mole =>{
         mole.addEventListener("click", event =>{
@@ -60,8 +110,34 @@ function playRounds(){
         mole.classList.add("deactive");
     })
 
-    if (!playing){
-        playing = setInterval(spawnMoles, (difficulty+1)*waitTime);
+    playWave(1);
+    
+
+
+}
+
+function decGameTime(){
+    gameTimer --;
+    timerText.innerText = `${gameTimer} sec`;
+    if (gameTimer == 0){
+        clearInterval(playing);
+        timerText.innerText = `GAME DONE!`;
     }
+
+    playBttn.disabled = false;
+    playBttn.setAttribute("onclick", );
+    
+
+}
+
+
+
+function refresh(){
+    location.reload();
+}
+
+function restart(){
     
 }
+
+
